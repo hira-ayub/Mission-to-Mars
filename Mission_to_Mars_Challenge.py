@@ -100,7 +100,7 @@ for img in imgs:
     hemisphere_image_urls.append(hemispheres)
 
 # 4. Print the list that holds the dictionary of each image url and title.
-print(hemisphere_image_urls)
+hemisphere_image_urls
 
 
 
