@@ -1,63 +1,67 @@
 # 10.5.2 Update the Code
 # 10.5.3 Integrate MongoDB Into the Web App
 
-# Import Splinter
+# Import Splinter, BeautifulSoup, and Pandas
 from splinter import Browser
 from bs4 import BeautifulSoup as soup
-from webdriver_manager.chrome import ChromeDriverManager
 import pandas as pd
 import datetime as dt
+from webdriver_manager.chrome import ChromeDriverManager
 
 
-def scrape_all(): #10.5.3
+def scrape_all():#10.5.3
     # Initiate headless driver for deployment
-# Set up Splinter
+    # Set up Splinter
     executable_path = {'executable_path': ChromeDriverManager().install()}
     browser = Browser('chrome', **executable_path, headless=True)
 
-# we're going to set our news title and paragraph variables (remember, this function will return two values).
-news_title, news_paragraph = mars_news(browser)
+    # we're going to set our news title and paragraph variables (remember, this function will return two values).
+    news_title, news_paragraph = mars_news(browser)
 
-# Run all scraping functions and store results in dictionary
-data = {
-      "news_title": news_title,
-      "news_paragraph": news_paragraph,
-      "featured_image": featured_image(browser),
-      "facts": mars_facts(),
-      "last_modified": dt.datetime.now()
-}
+    # Run all scraping functions and store results in a dictionary
+    data = {
+        "news_title": news_title,
+        "news_paragraph": news_paragraph,
+        "featured_image": featured_image(browser),
+        "facts": mars_facts(),
+        "last_modified": dt.datetime.now()
+    }
 
-   # Stop webdriver and return data
-    #browser.quit()
-return data
+    # Stop webdriver and return data
+    # browser.quit()
+    return data
 
-# 10.5.2 Update the Code
-# define a function
+    # 10.5.2 Update the Code
+    # define a function
+
 def mars_news(browser):
-# When we add the word "browser" to our function, we're telling Python that we'll be using the browser variable we defined outside the function. 
-# Visit the mars nasa news site
+    # When we add the word "browser" to our function, we're telling Python that we'll be using the browser variable we defined outside the function. 
+    # Scrape Mars News
+    # Visit the mars nasa news site
     url = 'https://data-class-mars.s3.amazonaws.com/Mars/index.html'
     browser.visit(url)
-# Optional delay for loading the page
+
+    # Optional delay for loading the page
     browser.is_element_present_by_css('div.list_text', wait_time=1)
- # Convert the browser html to a soup object and then quit the browser
+
+    # Convert the browser html to a soup object and then quit the browser
     html = browser.html
     news_soup = soup(html, 'html.parser')
-# Add try/except for error handling
+
+    # Add try/except for error handling
     try:
         slide_elem = news_soup.select_one('div.list_text')
-        slide_elem.find('div', class_='content_title')
-# Use the parent element to find the first `a` tag and save it as `news_title`
+        # Use the parent element to find the first 'a' tag and save it as 'news_title'
         news_title = slide_elem.find('div', class_='content_title').get_text()
-# Use the parent element to find the paragraph text
+        # Use the parent element to find the paragraph text
         news_p = slide_elem.find('div', class_='article_teaser_body').get_text()
+
     except AttributeError:
         return None, None
 
-return news_title, news_p
+    return news_title, news_p
 
-  # Featured Image
-
+    # Featured Image
 def featured_image(browser):
     # Visit URL
     url = 'https://data-class-jpl-space.s3.amazonaws.com/JPL_Space/index.html'
@@ -82,9 +86,8 @@ def featured_image(browser):
     # Use the base url to create an absolute url
     img_url = f'https://data-class-jpl-space.s3.amazonaws.com/JPL_Space/{img_url_rel}'
 
-return img_url
+    return img_url
 
-    # Mars Facts
 def mars_facts():
     # Add try/except for error handling
     try:
@@ -99,11 +102,9 @@ def mars_facts():
     df.set_index('Description', inplace=True)
 
     # Convert dataframe into HTML format, add bootstrap
-return df.to_html(classes="table table-striped")
+    return df.to_html(classes="table table-striped")
 
 if __name__ == "__main__":
 
     # If running as script, print scraped data
     print(scrape_all())
-
-
